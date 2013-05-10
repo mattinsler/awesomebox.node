@@ -150,10 +150,9 @@
     };
 
     function Awesomebox(options) {
-      var _ref;
       this.options = options != null ? options : {};
       Awesomebox.__super__.constructor.call(this, {
-        base_url: (_ref = process.env.AWESOMEBOX_URL) != null ? _ref : 'http://api.awesomebox.es'
+        base_url: this.options.base_url || 'http://api.awesomebox.es'
       });
       this.hook('pre:request', Awesomebox.hooks.json);
       if (this.options.api_key != null) {

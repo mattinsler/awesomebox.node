@@ -58,7 +58,7 @@ class Awesomebox extends Rest
       request_opts.form = opts
   
   constructor: (@options = {}) ->
-    super(base_url: process.env.AWESOMEBOX_URL ? 'http://api.awesomebox.es')
+    super(base_url: @options.base_url or 'http://api.awesomebox.es')
     
     @hook('pre:request', Awesomebox.hooks.json)
     @hook('pre:request', Awesomebox.hooks.api_key(@options.api_key)) if @options.api_key?

@@ -22,14 +22,15 @@ Api = {
       @versions = new Api.Versions(@client, @app)
     
     get: (cb) -> @client.get("/apps/#{encode(@app)}", cb)
-    status: (cb) -> @client.get("/apps/#{encode(@app)}/status", cb)
-    stop: (cb) -> @client.get("/apps/#{encode(@app)}/stop", cb)
-    start: (cb) -> @client.get("/apps/#{encode(@app)}/start", cb)
-    logs: (cb) -> @client.get("/apps/#{encode(@app)}/logs", cb)
+    # status: (cb) -> @client.get("/apps/#{encode(@app)}/status", cb)
+    # stop: (cb) -> @client.get("/apps/#{encode(@app)}/stop", cb)
+    # start: (cb) -> @client.get("/apps/#{encode(@app)}/start", cb)
+    # logs: (cb) -> @client.get("/apps/#{encode(@app)}/logs", cb)
     update: (file, cb) ->
       req = @client.put("/apps/#{encode(@app)}", cb)
       req.form().append('file', fs.createReadStream(file))
       req.on('error', cb)
+    version: (version) -> new Api.Version(@client, @app, version)
   
   Domains: class DomainsApi
     constructor: (@client, @app) ->
@@ -41,6 +42,11 @@ Api = {
     constructor: (@client, @app) ->
     list: (cb) -> @client.get("/apps/#{encode(@app)}/versions", cb)
     remove: (version, cb) -> @client.delete("/apps/#{encode(@app)}/versions/#{encode(version)}", cb)
+  
+  Version: class VersionApi
+    constructor: (@client, @app, @version) ->
+      start: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/start", cb)
+      stop: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/stop", cb)
 }
 
 class Awesomebox extends Rest

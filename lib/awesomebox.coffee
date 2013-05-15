@@ -1,6 +1,8 @@
 fs = require 'fs'
 Rest = require 'rest.node'
 
+encode = (v) -> encodeURIComponent(v).replace('.', '%2E')
+
 Api = {
   User: class UserApi
     constructor: (@client) ->
@@ -17,21 +19,28 @@ Api = {
   App: class AppApi
     constructor: (@client, @app) ->
       @domains = new Api.Domains(@client, @app)
+      @versions = new Api.Versions(@client, @app)
     
-    status: (cb) -> @client.get("/apps/#{@app}", cb)
-    stop: (cb) -> @client.get("/apps/#{@app}/stop", cb)
-    start: (cb) -> @client.get("/apps/#{@app}/start", cb)
-    logs: (cb) -> @client.get("/apps/#{@app}/logs", cb)
+    get: (cb) -> @client.get("/apps/#{encode(@app)}", cb)
+    status: (cb) -> @client.get("/apps/#{encode(@app)}/status", cb)
+    stop: (cb) -> @client.get("/apps/#{encode(@app)}/stop", cb)
+    start: (cb) -> @client.get("/apps/#{encode(@app)}/start", cb)
+    logs: (cb) -> @client.get("/apps/#{encode(@app)}/logs", cb)
     update: (file, cb) ->
-      req = @client.put("/apps/#{@app}", cb)
+      req = @client.put("/apps/#{encode(@app)}", cb)
       req.form().append('file', fs.createReadStream(file))
       req.on('error', cb)
   
   Domains: class DomainsApi
     constructor: (@client, @app) ->
-    list: (cb) -> @client.get("/apps/#{@app}/domains", cb)
-    add: (domain, cb) -> @client.post("/apps/#{@app}/domains", {domain: domain}, cb)
-    remove: (domain, cb) -> @client.delete("/apps/#{@app}/domains/#{domain}", cb)
+    list: (cb) -> @client.get("/apps/#{encode(@app)}/domains", cb)
+    add: (domain, cb) -> @client.post("/apps/#{encode(@app)}/domains", {domain: domain}, cb)
+    remove: (domain, cb) -> @client.delete("/apps/#{encode(@app)}/domains/#{encode(domain)}", cb)
+  
+  Versions: class VersionsApi
+    constructor: (@client, @app) ->
+    list: (cb) -> @client.get("/apps/#{encode(@app)}/versions", cb)
+    remove: (version, cb) -> @client.delete("/apps/#{encode(@app)}/versions/#{encode(version)}", cb)
 }
 
 class Awesomebox extends Rest

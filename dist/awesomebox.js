@@ -1,11 +1,15 @@
 (function() {
-  var Api, AppApi, AppsApi, Awesomebox, DomainsApi, Rest, UserApi, fs,
+  var Api, AppApi, AppsApi, Awesomebox, DomainsApi, Rest, UserApi, VersionsApi, encode, fs,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   fs = require('fs');
 
   Rest = require('rest.node');
+
+  encode = function(v) {
+    return encodeURIComponent(v).replace('.', '%2E');
+  };
 
   Api = {
     User: UserApi = (function() {
@@ -58,27 +62,32 @@
         this.client = client;
         this.app = app;
         this.domains = new Api.Domains(this.client, this.app);
+        this.versions = new Api.Versions(this.client, this.app);
       }
 
+      AppApi.prototype.get = function(cb) {
+        return this.client.get("/apps/" + (encode(this.app)), cb);
+      };
+
       AppApi.prototype.status = function(cb) {
-        return this.client.get("/apps/" + this.app, cb);
+        return this.client.get("/apps/" + (encode(this.app)) + "/status", cb);
       };
 
       AppApi.prototype.stop = function(cb) {
-        return this.client.get("/apps/" + this.app + "/stop", cb);
+        return this.client.get("/apps/" + (encode(this.app)) + "/stop", cb);
       };
 
       AppApi.prototype.start = function(cb) {
-        return this.client.get("/apps/" + this.app + "/start", cb);
+        return this.client.get("/apps/" + (encode(this.app)) + "/start", cb);
       };
 
       AppApi.prototype.logs = function(cb) {
-        return this.client.get("/apps/" + this.app + "/logs", cb);
+        return this.client.get("/apps/" + (encode(this.app)) + "/logs", cb);
       };
 
       AppApi.prototype.update = function(file, cb) {
         var req;
-        req = this.client.put("/apps/" + this.app, cb);
+        req = this.client.put("/apps/" + (encode(this.app)), cb);
         req.form().append('file', fs.createReadStream(file));
         return req.on('error', cb);
       };
@@ -94,20 +103,38 @@
       }
 
       DomainsApi.prototype.list = function(cb) {
-        return this.client.get("/apps/" + this.app + "/domains", cb);
+        return this.client.get("/apps/" + (encode(this.app)) + "/domains", cb);
       };
 
       DomainsApi.prototype.add = function(domain, cb) {
-        return this.client.post("/apps/" + this.app + "/domains", {
+        return this.client.post("/apps/" + (encode(this.app)) + "/domains", {
           domain: domain
         }, cb);
       };
 
       DomainsApi.prototype.remove = function(domain, cb) {
-        return this.client["delete"]("/apps/" + this.app + "/domains/" + domain, cb);
+        return this.client["delete"]("/apps/" + (encode(this.app)) + "/domains/" + (encode(domain)), cb);
       };
 
       return DomainsApi;
+
+    })(),
+    Versions: VersionsApi = (function() {
+
+      function VersionsApi(client, app) {
+        this.client = client;
+        this.app = app;
+      }
+
+      VersionsApi.prototype.list = function(cb) {
+        return this.client.get("/apps/" + (encode(this.app)) + "/versions", cb);
+      };
+
+      VersionsApi.prototype.remove = function(version, cb) {
+        return this.client["delete"]("/apps/" + (encode(this.app)) + "/versions/" + (encode(version)), cb);
+      };
+
+      return VersionsApi;
 
     })()
   };

@@ -1,5 +1,5 @@
 (function() {
-  var Api, AppApi, AppsApi, Awesomebox, DomainsApi, Rest, UserApi, VersionsApi, encode, fs,
+  var Api, AppApi, AppsApi, Awesomebox, DomainsApi, Rest, UserApi, VersionApi, VersionsApi, encode, fs,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -69,27 +69,15 @@
         return this.client.get("/apps/" + (encode(this.app)), cb);
       };
 
-      AppApi.prototype.status = function(cb) {
-        return this.client.get("/apps/" + (encode(this.app)) + "/status", cb);
-      };
-
-      AppApi.prototype.stop = function(cb) {
-        return this.client.get("/apps/" + (encode(this.app)) + "/stop", cb);
-      };
-
-      AppApi.prototype.start = function(cb) {
-        return this.client.get("/apps/" + (encode(this.app)) + "/start", cb);
-      };
-
-      AppApi.prototype.logs = function(cb) {
-        return this.client.get("/apps/" + (encode(this.app)) + "/logs", cb);
-      };
-
       AppApi.prototype.update = function(file, cb) {
         var req;
         req = this.client.put("/apps/" + (encode(this.app)), cb);
         req.form().append('file', fs.createReadStream(file));
         return req.on('error', cb);
+      };
+
+      AppApi.prototype.version = function(version) {
+        return new Api.Version(this.client, this.app, version);
       };
 
       return AppApi;
@@ -135,6 +123,25 @@
       };
 
       return VersionsApi;
+
+    })(),
+    Version: VersionApi = (function() {
+
+      function VersionApi(client, app, version) {
+        this.client = client;
+        this.app = app;
+        this.version = version;
+        ({
+          start: function(cb) {
+            return this.client.post("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/start", cb);
+          },
+          stop: function(cb) {
+            return this.client.post("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/stop", cb);
+          }
+        });
+      }
+
+      return VersionApi;
 
     })()
   };

@@ -45,8 +45,10 @@ Api = {
   
   Version: class VersionApi
     constructor: (@client, @app, @version) ->
-      start: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/start", cb)
-      stop: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/stop", cb)
+    start: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/start", cb)
+    stop: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/stop", cb)
+    status: (cb) -> @client.get("/apps/#{encode(@app)}/versions/#{encode(@version)}/status", cb)
+    logs: (cb) -> @client.get("/apps/#{encode(@app)}/versions/#{encode(@version)}/logs", cb)
 }
 
 class Awesomebox extends Rest

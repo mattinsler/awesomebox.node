@@ -131,15 +131,23 @@
         this.client = client;
         this.app = app;
         this.version = version;
-        ({
-          start: function(cb) {
-            return this.client.post("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/start", cb);
-          },
-          stop: function(cb) {
-            return this.client.post("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/stop", cb);
-          }
-        });
       }
+
+      VersionApi.prototype.start = function(cb) {
+        return this.client.post("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/start", cb);
+      };
+
+      VersionApi.prototype.stop = function(cb) {
+        return this.client.post("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/stop", cb);
+      };
+
+      VersionApi.prototype.status = function(cb) {
+        return this.client.get("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/status", cb);
+      };
+
+      VersionApi.prototype.logs = function(cb) {
+        return this.client.get("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/logs", cb);
+      };
 
       return VersionApi;
 

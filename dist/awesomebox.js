@@ -145,6 +145,10 @@
         return this.client.get("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/status", cb);
       };
 
+      VersionApi.prototype.bless = function(cb) {
+        return this.client.post("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/bless", cb);
+      };
+
       VersionApi.prototype.logs = function(cb) {
         return this.client.get("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/logs", cb);
       };

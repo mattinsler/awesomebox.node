@@ -48,6 +48,7 @@ Api = {
     start: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/start", cb)
     stop: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/stop", cb)
     status: (cb) -> @client.get("/apps/#{encode(@app)}/versions/#{encode(@version)}/status", cb)
+    bless: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/bless", cb)
     logs: (cb) -> @client.get("/apps/#{encode(@app)}/versions/#{encode(@version)}/logs", cb)
 }
 

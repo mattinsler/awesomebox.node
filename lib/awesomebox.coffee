@@ -26,12 +26,17 @@ Api = {
     # stop: (cb) -> @client.get("/apps/#{encode(@app)}/stop", cb)
     # start: (cb) -> @client.get("/apps/#{encode(@app)}/start", cb)
     # logs: (cb) -> @client.get("/apps/#{encode(@app)}/logs", cb)
-    update: (file, cb) ->
+    update: (file, data, cb) ->
       file = fs.createReadStream(file) if typeof file is 'string'
       return callback(new Error('File must be a string or a readable stream')) unless file instanceof require('stream')
+      if typeof data is 'function'
+        cb = data
+        data = {}
       
       req = @client.put("/apps/#{encode(@app)}", cb)
-      req.form().append('file', file)
+      form = req.form()
+      form.append('file', file)
+      form.append(k, v) for k, v of data
       req.on('error', cb)
     version: (version) -> new Api.Version(@client, @app, version)
   

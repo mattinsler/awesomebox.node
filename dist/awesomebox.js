@@ -69,16 +69,25 @@
         return this.client.get("/apps/" + (encode(this.app)), cb);
       };
 
-      AppApi.prototype.update = function(file, cb) {
-        var req;
+      AppApi.prototype.update = function(file, data, cb) {
+        var form, k, req, v;
         if (typeof file === 'string') {
           file = fs.createReadStream(file);
         }
         if (!(file instanceof require('stream'))) {
           return callback(new Error('File must be a string or a readable stream'));
         }
+        if (typeof data === 'function') {
+          cb = data;
+          data = {};
+        }
         req = this.client.put("/apps/" + (encode(this.app)), cb);
-        req.form().append('file', file);
+        form = req.form();
+        form.append('file', file);
+        for (k in data) {
+          v = data[k];
+          form.append(k, v);
+        }
         return req.on('error', cb);
       };
 

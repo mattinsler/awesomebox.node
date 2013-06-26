@@ -71,8 +71,14 @@
 
       AppApi.prototype.update = function(file, cb) {
         var req;
+        if (typeof file === 'string') {
+          file = fs.createReadStream(file);
+        }
+        if (!(file instanceof require('stream'))) {
+          return callback(new Error('File must be a string or a readable stream'));
+        }
         req = this.client.put("/apps/" + (encode(this.app)), cb);
-        req.form().append('file', fs.createReadStream(file));
+        req.form().append('file', file);
         return req.on('error', cb);
       };
 

@@ -1,7 +1,7 @@
 {
   "name": "awesomebox.node",
   "description": "Awesomebox API client",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "homepage": "https://github.com/mattinsler/awesomebox.node",
   "author": {
     "name": "Matt Insler",
@@ -24,6 +24,9 @@
   "main": "dist/awesomebox",
   "engines": {
     "node": ">= 0.6.0"
+  },
+  "scripts": {
+    "grunt": "grunt"
   },
   "dependencies": {
     "rest.node": "0.3.x"

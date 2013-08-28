@@ -1,15 +1,33 @@
 fs = require 'fs'
+stream = require 'stream'
 Rest = require 'rest.node'
+
+try
+  ReadableStream = stream.Readable
+catch e
+  ReadableStream = stream
 
 encode = (v) -> encodeURIComponent(v).replace('.', '%2E')
 
 Api = {
-  User: class UserApi
+  Me: class MeApi
     constructor: (@client) ->
     get: (cb) -> @client.get('/me', cb)
-    create: (data, cb) -> @client.post('/users', data, cb)
+  
+  Boxes: class BoxesApi
+    constructor: (@client) ->
+    list: (cb) -> @client.get('/boxes', cb)
+    create: (data, cb) -> @client.post('/boxes', data, cb)
+  
+  Box: class BoxApi
+    constructor: (@client, @box) ->
+    get: (cb) -> @client.get("/boxes/#{@box}", cb)
+    push: (data, cb) -> @client.put("/boxes/#{@box}", data, cb)
+  
+  Users: class UsersApi
+    constructor: (@client) ->
     reserve: (data, cb) -> @client.post('/users/reserve', data, cb)
-    destroy: (cb) -> @client.delete('/me', cb)
+    redeem: (data, cb) -> @client.post('/users/redeem', data, cb)
   
   Apps: class AppsApi
     constructor: (@client) ->
@@ -77,24 +95,51 @@ class Awesomebox extends Rest
           user: email
           pass: password
     
-    get: (request_opts, opts) ->
+    data_to_querystring: (request_opts, opts) ->
       request_opts.qs = opts
     
-    post: (request_opts, opts) ->
+    data_to_form: (request_opts, opts) ->
+      return if opts.__attach_files__ is true
       request_opts.form = opts
-  
+    
+    attach_files: (request_opts, opts, req) ->
+      return unless opts.__attach_files__ is true
+      delete opts.__attach_files__
+      
+      form = req.form()
+      form.append(k, v) for k, v of opts
+      req.on 'error', (err) -> req.emit('error', err)
+      
+    pre_attach_files: (request_opts, opts) ->
+      for k, v of opts
+        if v instanceof ReadableStream
+          opts.__attach_files__ = true
+          return
+    
   constructor: (@options = {}) ->
     super(base_url: @options.base_url or 'http://api.awesomebox.es')
     
     @hook('pre:request', Awesomebox.hooks.json)
     @hook('pre:request', Awesomebox.hooks.api_key(@options.api_key)) if @options.api_key?
     @hook('pre:request', Awesomebox.hooks.email_password(@options.email, @options.password)) if @options.email? and @options.password?
-    @hook('pre:post', Awesomebox.hooks.post)
-    @hook('pre:get', Awesomebox.hooks.get)
     
-    @user = new Api.User(@)
+    @hook('pre:get', Awesomebox.hooks.data_to_querystring)
+    
+    @hook('pre:post', Awesomebox.hooks.pre_attach_files)
+    @hook('pre:post', Awesomebox.hooks.data_to_form)
+    @hook('post:post', Awesomebox.hooks.attach_files)
+    
+    @hook('pre:put', Awesomebox.hooks.pre_attach_files)
+    @hook('pre:put', Awesomebox.hooks.data_to_form)
+    @hook('post:put', Awesomebox.hooks.attach_files)
+    
+    @me = new Api.Me(@)
+    @boxes = new Api.Boxes(@)
+    
+    @users = new Api.Users(@)
     @apps = new Api.Apps(@)
   
   app: (app) -> new Api.App(@, app)
+  box: (box) -> new Api.Box(@, box)
 
 module.exports = Awesomebox

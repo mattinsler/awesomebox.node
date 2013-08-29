@@ -10,6 +10,11 @@ catch e
 encode = (v) -> encodeURIComponent(v).replace('.', '%2E')
 
 Api = {
+  Users: class UsersApi
+    constructor: (@client) ->
+    reserve: (data, cb) -> @client.post('/users/reserve', data, cb)
+    redeem: (data, cb) -> @client.post('/users/redeem', data, cb)
+  
   Me: class MeApi
     constructor: (@client) ->
     get: (cb) -> @client.get('/me', cb)
@@ -21,61 +26,66 @@ Api = {
   
   Box: class BoxApi
     constructor: (@client, @box) ->
+      @versions = new Api.Versions(@client, @box)
     get: (cb) -> @client.get("/boxes/#{@box}", cb)
     push: (data, cb) -> @client.put("/boxes/#{@box}", data, cb)
-  
-  Users: class UsersApi
-    constructor: (@client) ->
-    reserve: (data, cb) -> @client.post('/users/reserve', data, cb)
-    redeem: (data, cb) -> @client.post('/users/redeem', data, cb)
-  
-  Apps: class AppsApi
-    constructor: (@client) ->
-    list: (cb) -> @client.get('/apps', cb)
-    create: (name, cb) -> @client.post('/apps', {name: name}, cb)
-  
-  App: class AppApi
-    constructor: (@client, @app) ->
-      @domains = new Api.Domains(@client, @app)
-      @versions = new Api.Versions(@client, @app)
-    
-    get: (cb) -> @client.get("/apps/#{encode(@app)}", cb)
-    # status: (cb) -> @client.get("/apps/#{encode(@app)}/status", cb)
-    # stop: (cb) -> @client.get("/apps/#{encode(@app)}/stop", cb)
-    # start: (cb) -> @client.get("/apps/#{encode(@app)}/start", cb)
-    # logs: (cb) -> @client.get("/apps/#{encode(@app)}/logs", cb)
-    update: (file, data, cb) ->
-      file = fs.createReadStream(file) if typeof file is 'string'
-      return callback(new Error('File must be a string or a readable stream')) unless file instanceof require('stream')
-      if typeof data is 'function'
-        cb = data
-        data = {}
-      
-      req = @client.put("/apps/#{encode(@app)}", cb)
-      form = req.form()
-      form.append('file', file)
-      form.append(k, v) for k, v of data
-      req.on('error', cb)
-    version: (version) -> new Api.Version(@client, @app, version)
-  
-  Domains: class DomainsApi
-    constructor: (@client, @app) ->
-    list: (cb) -> @client.get("/apps/#{encode(@app)}/domains", cb)
-    add: (domain, cb) -> @client.post("/apps/#{encode(@app)}/domains", {domain: domain}, cb)
-    remove: (domain, cb) -> @client.delete("/apps/#{encode(@app)}/domains/#{encode(domain)}", cb)
+    version: (version) -> new Api.Version(@client, @box, version)
   
   Versions: class VersionsApi
-    constructor: (@client, @app) ->
-    list: (cb) -> @client.get("/apps/#{encode(@app)}/versions", cb)
-    remove: (version, cb) -> @client.delete("/apps/#{encode(@app)}/versions/#{encode(version)}", cb)
+    constructor: (@client, @box) ->
+    list: (opts, cb) -> @client.get("/boxes/#{@box}/versions", opts, cb)
   
   Version: class VersionApi
-    constructor: (@client, @app, @version) ->
-    start: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/start", cb)
-    stop: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/stop", cb)
-    status: (cb) -> @client.get("/apps/#{encode(@app)}/versions/#{encode(@version)}/status", cb)
-    bless: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/bless", cb)
-    logs: (cb) -> @client.get("/apps/#{encode(@app)}/versions/#{encode(@version)}/logs", cb)
+    constructor: (@client, @box, @version) ->
+    get: (cb) -> @client.get("/boxes/#{@box}/versions/#{@version}", cb)
+  
+  # Apps: class AppsApi
+  #   constructor: (@client) ->
+  #   list: (cb) -> @client.get('/apps', cb)
+  #   create: (name, cb) -> @client.post('/apps', {name: name}, cb)
+  # 
+  # App: class AppApi
+  #   constructor: (@client, @app) ->
+  #     @domains = new Api.Domains(@client, @app)
+  #     @versions = new Api.Versions(@client, @app)
+  #   
+  #   get: (cb) -> @client.get("/apps/#{encode(@app)}", cb)
+  #   # status: (cb) -> @client.get("/apps/#{encode(@app)}/status", cb)
+  #   # stop: (cb) -> @client.get("/apps/#{encode(@app)}/stop", cb)
+  #   # start: (cb) -> @client.get("/apps/#{encode(@app)}/start", cb)
+  #   # logs: (cb) -> @client.get("/apps/#{encode(@app)}/logs", cb)
+  #   update: (file, data, cb) ->
+  #     file = fs.createReadStream(file) if typeof file is 'string'
+  #     return callback(new Error('File must be a string or a readable stream')) unless file instanceof require('stream')
+  #     if typeof data is 'function'
+  #       cb = data
+  #       data = {}
+  #     
+  #     req = @client.put("/apps/#{encode(@app)}", cb)
+  #     form = req.form()
+  #     form.append('file', file)
+  #     form.append(k, v) for k, v of data
+  #     req.on('error', cb)
+  #   version: (version) -> new Api.Version(@client, @app, version)
+  # 
+  # Domains: class DomainsApi
+  #   constructor: (@client, @app) ->
+  #   list: (cb) -> @client.get("/apps/#{encode(@app)}/domains", cb)
+  #   add: (domain, cb) -> @client.post("/apps/#{encode(@app)}/domains", {domain: domain}, cb)
+  #   remove: (domain, cb) -> @client.delete("/apps/#{encode(@app)}/domains/#{encode(domain)}", cb)
+  # 
+  # Versions: class VersionsApi
+  #   constructor: (@client, @app) ->
+  #   list: (cb) -> @client.get("/apps/#{encode(@app)}/versions", cb)
+  #   remove: (version, cb) -> @client.delete("/apps/#{encode(@app)}/versions/#{encode(version)}", cb)
+  # 
+  # Version: class VersionApi
+  #   constructor: (@client, @app, @version) ->
+  #   start: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/start", cb)
+  #   stop: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/stop", cb)
+  #   status: (cb) -> @client.get("/apps/#{encode(@app)}/versions/#{encode(@version)}/status", cb)
+  #   bless: (cb) -> @client.post("/apps/#{encode(@app)}/versions/#{encode(@version)}/bless", cb)
+  #   logs: (cb) -> @client.get("/apps/#{encode(@app)}/versions/#{encode(@version)}/logs", cb)
 }
 
 class Awesomebox extends Rest
@@ -133,13 +143,10 @@ class Awesomebox extends Rest
     @hook('pre:put', Awesomebox.hooks.data_to_form)
     @hook('post:put', Awesomebox.hooks.attach_files)
     
+    @users = new Api.Users(@)
     @me = new Api.Me(@)
     @boxes = new Api.Boxes(@)
-    
-    @users = new Api.Users(@)
-    @apps = new Api.Apps(@)
   
-  app: (app) -> new Api.App(@, app)
   box: (box) -> new Api.Box(@, box)
 
 module.exports = Awesomebox

@@ -1,5 +1,5 @@
 (function() {
-  var Api, AppApi, AppsApi, Awesomebox, BoxApi, BoxesApi, DomainsApi, MeApi, ReadableStream, Rest, UsersApi, VersionApi, VersionsApi, encode, fs, stream,
+  var Api, Awesomebox, BoxApi, BoxesApi, MeApi, ReadableStream, Rest, UsersApi, VersionApi, VersionsApi, encode, fs, stream,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -20,6 +20,23 @@
   };
 
   Api = {
+    Users: UsersApi = (function() {
+
+      function UsersApi(client) {
+        this.client = client;
+      }
+
+      UsersApi.prototype.reserve = function(data, cb) {
+        return this.client.post('/users/reserve', data, cb);
+      };
+
+      UsersApi.prototype.redeem = function(data, cb) {
+        return this.client.post('/users/redeem', data, cb);
+      };
+
+      return UsersApi;
+
+    })(),
     Me: MeApi = (function() {
 
       function MeApi(client) {
@@ -55,6 +72,7 @@
       function BoxApi(client, box) {
         this.client = client;
         this.box = box;
+        this.versions = new Api.Versions(this.client, this.box);
       }
 
       BoxApi.prototype.get = function(cb) {
@@ -65,124 +83,22 @@
         return this.client.put("/boxes/" + this.box, data, cb);
       };
 
+      BoxApi.prototype.version = function(version) {
+        return new Api.Version(this.client, this.box, version);
+      };
+
       return BoxApi;
-
-    })(),
-    Users: UsersApi = (function() {
-
-      function UsersApi(client) {
-        this.client = client;
-      }
-
-      UsersApi.prototype.reserve = function(data, cb) {
-        return this.client.post('/users/reserve', data, cb);
-      };
-
-      UsersApi.prototype.redeem = function(data, cb) {
-        return this.client.post('/users/redeem', data, cb);
-      };
-
-      return UsersApi;
-
-    })(),
-    Apps: AppsApi = (function() {
-
-      function AppsApi(client) {
-        this.client = client;
-      }
-
-      AppsApi.prototype.list = function(cb) {
-        return this.client.get('/apps', cb);
-      };
-
-      AppsApi.prototype.create = function(name, cb) {
-        return this.client.post('/apps', {
-          name: name
-        }, cb);
-      };
-
-      return AppsApi;
-
-    })(),
-    App: AppApi = (function() {
-
-      function AppApi(client, app) {
-        this.client = client;
-        this.app = app;
-        this.domains = new Api.Domains(this.client, this.app);
-        this.versions = new Api.Versions(this.client, this.app);
-      }
-
-      AppApi.prototype.get = function(cb) {
-        return this.client.get("/apps/" + (encode(this.app)), cb);
-      };
-
-      AppApi.prototype.update = function(file, data, cb) {
-        var form, k, req, v;
-        if (typeof file === 'string') {
-          file = fs.createReadStream(file);
-        }
-        if (!(file instanceof require('stream'))) {
-          return callback(new Error('File must be a string or a readable stream'));
-        }
-        if (typeof data === 'function') {
-          cb = data;
-          data = {};
-        }
-        req = this.client.put("/apps/" + (encode(this.app)), cb);
-        form = req.form();
-        form.append('file', file);
-        for (k in data) {
-          v = data[k];
-          form.append(k, v);
-        }
-        return req.on('error', cb);
-      };
-
-      AppApi.prototype.version = function(version) {
-        return new Api.Version(this.client, this.app, version);
-      };
-
-      return AppApi;
-
-    })(),
-    Domains: DomainsApi = (function() {
-
-      function DomainsApi(client, app) {
-        this.client = client;
-        this.app = app;
-      }
-
-      DomainsApi.prototype.list = function(cb) {
-        return this.client.get("/apps/" + (encode(this.app)) + "/domains", cb);
-      };
-
-      DomainsApi.prototype.add = function(domain, cb) {
-        return this.client.post("/apps/" + (encode(this.app)) + "/domains", {
-          domain: domain
-        }, cb);
-      };
-
-      DomainsApi.prototype.remove = function(domain, cb) {
-        return this.client["delete"]("/apps/" + (encode(this.app)) + "/domains/" + (encode(domain)), cb);
-      };
-
-      return DomainsApi;
 
     })(),
     Versions: VersionsApi = (function() {
 
-      function VersionsApi(client, app) {
+      function VersionsApi(client, box) {
         this.client = client;
-        this.app = app;
+        this.box = box;
       }
 
-      VersionsApi.prototype.list = function(cb) {
-        return this.client.get("/apps/" + (encode(this.app)) + "/versions", cb);
-      };
-
-      VersionsApi.prototype.remove = function(version, cb) {
-        return this.client["delete"]("/apps/" + (encode(this.app)) + "/versions/" + (encode(version)), cb);
+      VersionsApi.prototype.list = function(opts, cb) {
+        return this.client.get("/boxes/" + this.box + "/versions", opts, cb);
       };
 
       return VersionsApi;
@@ -190,30 +106,14 @@
     })(),
     Version: VersionApi = (function() {
 
-      function VersionApi(client, app, version) {
+      function VersionApi(client, box, version) {
         this.client = client;
-        this.app = app;
+        this.box = box;
         this.version = version;
       }
 
-      VersionApi.prototype.start = function(cb) {
-        return this.client.post("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/start", cb);
-      };
-
-      VersionApi.prototype.stop = function(cb) {
-        return this.client.post("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/stop", cb);
-      };
-
-      VersionApi.prototype.status = function(cb) {
-        return this.client.get("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/status", cb);
-      };
-
-      VersionApi.prototype.bless = function(cb) {
-        return this.client.post("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/bless", cb);
-      };
-
-      VersionApi.prototype.logs = function(cb) {
-        return this.client.get("/apps/" + (encode(this.app)) + "/versions/" + (encode(this.version)) + "/logs", cb);
+      VersionApi.prototype.get = function(cb) {
+        return this.client.get("/boxes/" + this.box + "/versions/" + this.version, cb);
       };
 
       return VersionApi;
@@ -305,15 +205,10 @@
       this.hook('pre:put', Awesomebox.hooks.pre_attach_files);
       this.hook('pre:put', Awesomebox.hooks.data_to_form);
       this.hook('post:put', Awesomebox.hooks.attach_files);
+      this.users = new Api.Users(this);
       this.me = new Api.Me(this);
       this.boxes = new Api.Boxes(this);
-      this.users = new Api.Users(this);
-      this.apps = new Api.Apps(this);
     }
-
-    Awesomebox.prototype.app = function(app) {
-      return new Api.App(this, app);
-    };
 
     Awesomebox.prototype.box = function(box) {
       return new Api.Box(this, box);

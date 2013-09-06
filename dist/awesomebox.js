@@ -1,5 +1,5 @@
 (function() {
-  var Api, Awesomebox, BoxApi, BoxesApi, MeApi, ReadableStream, Rest, UsersApi, VersionApi, VersionsApi, encode, fs, stream,
+  var Api, Awesomebox, BoxApi, BoxesApi, MeApi, ProviderApi, ProvidersApi, ReadableStream, Rest, UsersApi, VersionApi, VersionsApi, encode, fs, stream,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -118,6 +118,45 @@
 
       return VersionApi;
 
+    })(),
+    Providers: ProvidersApi = (function() {
+
+      function ProvidersApi(client) {
+        this.client = client;
+      }
+
+      ProvidersApi.prototype.list = function(cb) {
+        return this.client.get('/providers', cb);
+      };
+
+      ProvidersApi.prototype.create = function(opts, cb) {
+        return this.client.post('/providers', opts, cb);
+      };
+
+      return ProvidersApi;
+
+    })(),
+    Provider: ProviderApi = (function() {
+
+      function ProviderApi(client, provider) {
+        this.client = client;
+        this.provider = provider;
+      }
+
+      ProviderApi.prototype.get = function(cb) {
+        return this.client.get("/providers/" + this.provider, cb);
+      };
+
+      ProviderApi.prototype.update = function(opts, cb) {
+        return this.client.put("/providers/" + this.provider, opts, cb);
+      };
+
+      ProviderApi.prototype.destroy = function(cb) {
+        return this.client["delete"]("/providers/" + this.provider, cb);
+      };
+
+      return ProviderApi;
+
     })()
   };
 
@@ -208,10 +247,15 @@
       this.users = new Api.Users(this);
       this.me = new Api.Me(this);
       this.boxes = new Api.Boxes(this);
+      this.providers = new Api.Providers(this);
     }
 
     Awesomebox.prototype.box = function(box) {
       return new Api.Box(this, box);
+    };
+
+    Awesomebox.prototype.provider = function(provider) {
+      return new Api.Provider(this, provider);
     };
 
     return Awesomebox;

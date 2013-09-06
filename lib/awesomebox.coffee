@@ -39,6 +39,17 @@ Api = {
     constructor: (@client, @box, @version) ->
     get: (cb) -> @client.get("/boxes/#{@box}/versions/#{@version}", cb)
   
+  Providers: class ProvidersApi
+    constructor: (@client) ->
+    list: (cb) -> @client.get('/providers', cb)
+    create: (opts, cb) -> @client.post('/providers', opts, cb)
+  
+  Provider: class ProviderApi
+    constructor: (@client, @provider) ->
+    get: (cb) -> @client.get("/providers/#{@provider}", cb)
+    update: (opts, cb) -> @client.put("/providers/#{@provider}", opts, cb)
+    destroy: (cb) -> @client.delete("/providers/#{@provider}", cb)
+  
   # Apps: class AppsApi
   #   constructor: (@client) ->
   #   list: (cb) -> @client.get('/apps', cb)
@@ -146,7 +157,9 @@ class Awesomebox extends Rest
     @users = new Api.Users(@)
     @me = new Api.Me(@)
     @boxes = new Api.Boxes(@)
+    @providers = new Api.Providers(@)
   
   box: (box) -> new Api.Box(@, box)
+  provider: (provider) -> new Api.Provider(@, provider)
 
 module.exports = Awesomebox

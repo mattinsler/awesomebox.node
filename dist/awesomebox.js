@@ -1,5 +1,5 @@
 (function() {
-  var Api, Awesomebox, BoxApi, BoxesApi, MeApi, ProviderApi, ProvidersApi, ReadableStream, Rest, UsersApi, VersionApi, VersionsApi, encode, fs, stream,
+  var Api, Awesomebox, BoxApi, BoxesApi, MeApi, ProviderApi, ProvidersApi, Rest, UsersApi, VersionApi, VersionsApi, encode, fs, stream,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -8,12 +8,6 @@
   stream = require('stream');
 
   Rest = require('rest.node');
-
-  try {
-    ReadableStream = stream.Readable;
-  } catch (e) {
-    ReadableStream = stream;
-  }
 
   encode = function(v) {
     return encodeURIComponent(v).replace('.', '%2E');
@@ -214,7 +208,8 @@
         });
       },
       pre_attach_files: function(request_opts, opts) {
-        var k, v;
+        var ReadableStream, k, v;
+        ReadableStream = stream.Readable || stream.Stream;
         for (k in opts) {
           v = opts[k];
           if (v instanceof ReadableStream) {

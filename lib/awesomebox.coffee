@@ -2,11 +2,6 @@ fs = require 'fs'
 stream = require 'stream'
 Rest = require 'rest.node'
 
-try
-  ReadableStream = stream.Readable
-catch e
-  ReadableStream = stream
-
 encode = (v) -> encodeURIComponent(v).replace('.', '%2E')
 
 Api = {
@@ -132,6 +127,8 @@ class Awesomebox extends Rest
       req.on 'error', (err) -> req.emit('error', err)
       
     pre_attach_files: (request_opts, opts) ->
+      ReadableStream = stream.Readable or stream.Stream
+      
       for k, v of opts
         if v instanceof ReadableStream
           opts.__attach_files__ = true

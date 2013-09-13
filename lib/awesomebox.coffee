@@ -22,9 +22,11 @@ Api = {
   Box: class BoxApi
     constructor: (@client, @box) ->
       @versions = new Api.Versions(@client, @box)
+      @domains = new Api.Domains(@client, @box)
     get: (cb) -> @client.get("/boxes/#{@box}", cb)
     push: (data, cb) -> @client.put("/boxes/#{@box}", data, cb)
     version: (version) -> new Api.Version(@client, @box, version)
+    domain: (domain) -> new Api.Domain(@client, @box, domain)
   
   Versions: class VersionsApi
     constructor: (@client, @box) ->
@@ -33,6 +35,15 @@ Api = {
   Version: class VersionApi
     constructor: (@client, @box, @version) ->
     get: (cb) -> @client.get("/boxes/#{@box}/versions/#{@version}", cb)
+  
+  Domains: class DomainsApi
+    constructor: (@client, @box) ->
+    list: (cb) -> @client.get("/boxes/#{@box}/domains", cb)
+    create: (domain, cb) -> @client.post("/boxes/#{@box}/domains", {domain: domain}, cb)
+  
+  Domain: class DomainApi
+    constructor: (@client, @box, @domain) ->
+    destroy: (cb) -> @client.delete("/boxes/#{@box}/domains/#{encode(@domain)}")
   
   Providers: class ProvidersApi
     constructor: (@client) ->

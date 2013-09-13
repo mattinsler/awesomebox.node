@@ -1,5 +1,5 @@
 (function() {
-  var Api, Awesomebox, BoxApi, BoxesApi, MeApi, ProviderApi, ProvidersApi, Rest, UsersApi, VersionApi, VersionsApi, encode, fs, stream,
+  var Api, Awesomebox, BoxApi, BoxesApi, DomainApi, DomainsApi, MeApi, ProviderApi, ProvidersApi, Rest, UsersApi, VersionApi, VersionsApi, encode, fs, stream,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -67,6 +67,7 @@
         this.client = client;
         this.box = box;
         this.versions = new Api.Versions(this.client, this.box);
+        this.domains = new Api.Domains(this.client, this.box);
       }
 
       BoxApi.prototype.get = function(cb) {
@@ -79,6 +80,10 @@
 
       BoxApi.prototype.version = function(version) {
         return new Api.Version(this.client, this.box, version);
+      };
+
+      BoxApi.prototype.domain = function(domain) {
+        return new Api.Domain(this.client, this.box, domain);
       };
 
       return BoxApi;
@@ -111,6 +116,41 @@
       };
 
       return VersionApi;
+
+    })(),
+    Domains: DomainsApi = (function() {
+
+      function DomainsApi(client, box) {
+        this.client = client;
+        this.box = box;
+      }
+
+      DomainsApi.prototype.list = function(cb) {
+        return this.client.get("/boxes/" + this.box + "/domains", cb);
+      };
+
+      DomainsApi.prototype.create = function(domain, cb) {
+        return this.client.post("/boxes/" + this.box + "/domains", {
+          domain: domain
+        }, cb);
+      };
+
+      return DomainsApi;
+
+    })(),
+    Domain: DomainApi = (function() {
+
+      function DomainApi(client, box, domain) {
+        this.client = client;
+        this.box = box;
+        this.domain = domain;
+      }
+
+      DomainApi.prototype.destroy = function(cb) {
+        return this.client["delete"]("/boxes/" + this.box + "/domains/" + (encode(this.domain)));
+      };
+
+      return DomainApi;
 
     })(),
     Providers: ProvidersApi = (function() {

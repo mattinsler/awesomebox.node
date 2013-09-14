@@ -2,7 +2,7 @@ fs = require 'fs'
 stream = require 'stream'
 Rest = require 'rest.node'
 
-encode = (v) -> encodeURIComponent(v).replace('.', '%2E')
+encode = (v) -> encodeURIComponent(v).replace(/\./g, '%2E')
 
 Api = {
   Users: class UsersApi
@@ -43,7 +43,7 @@ Api = {
   
   Domain: class DomainApi
     constructor: (@client, @box, @domain) ->
-    destroy: (cb) -> @client.delete("/boxes/#{@box}/domains/#{encode(@domain)}")
+    destroy: (cb) -> @client.delete("/boxes/#{@box}/domains/#{encode(@domain)}", cb)
   
   Providers: class ProvidersApi
     constructor: (@client) ->

@@ -10,7 +10,7 @@
   Rest = require('rest.node');
 
   encode = function(v) {
-    return encodeURIComponent(v).replace('.', '%2E');
+    return encodeURIComponent(v).replace(/\./g, '%2E');
   };
 
   Api = {
@@ -147,7 +147,7 @@
       }
 
       DomainApi.prototype.destroy = function(cb) {
-        return this.client["delete"]("/boxes/" + this.box + "/domains/" + (encode(this.domain)));
+        return this.client["delete"]("/boxes/" + this.box + "/domains/" + (encode(this.domain)), cb);
       };
 
       return DomainApi;

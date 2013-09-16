@@ -37,6 +37,7 @@ Api = {
   Version: class VersionApi
     constructor: (@client, @box, @version) ->
     get: (cb) -> @client.get("/boxes/#{@box}/versions/#{@version}", cb)
+    activate: (cb) -> @client.post("/boxes/#{@box}/versions/#{@version}/activate", cb)
   
   Domains: class DomainsApi
     constructor: (@client, @box) ->

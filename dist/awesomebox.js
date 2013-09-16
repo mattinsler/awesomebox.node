@@ -128,6 +128,10 @@
         return this.client.get("/boxes/" + this.box + "/versions/" + this.version, cb);
       };
 
+      VersionApi.prototype.activate = function(cb) {
+        return this.client.post("/boxes/" + this.box + "/versions/" + this.version + "/activate", cb);
+      };
+
       return VersionApi;
 
     })(),

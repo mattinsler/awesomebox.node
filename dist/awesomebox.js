@@ -28,6 +28,19 @@
         return this.client.post('/users/redeem', data, cb);
       };
 
+      UsersApi.prototype.reset_password = function(email, cb) {
+        return this.client.post('/users/reset-password', {
+          email: email
+        }, cb);
+      };
+
+      UsersApi.prototype.change_password = function(reset_token, password, cb) {
+        return this.client.post('/users/change-password', {
+          reset_token: reset_token,
+          password: password
+        }, cb);
+      };
+
       return UsersApi;
 
     })(),

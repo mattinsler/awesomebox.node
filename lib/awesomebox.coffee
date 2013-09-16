@@ -9,6 +9,8 @@ Api = {
     constructor: (@client) ->
     reserve: (data, cb) -> @client.post('/users/reserve', data, cb)
     redeem: (data, cb) -> @client.post('/users/redeem', data, cb)
+    reset_password: (email, cb) -> @client.post('/users/reset-password', {email: email}, cb)
+    change_password: (reset_token, password, cb) -> @client.post('/users/change-password', {reset_token: reset_token, password: password}, cb)
   
   Me: class MeApi
     constructor: (@client) ->

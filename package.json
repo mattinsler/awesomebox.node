@@ -29,7 +29,7 @@
     "grunt": "grunt"
   },
   "dependencies": {
-    "rest.node": "0.3.x"
+    "rest.node": "0.4.x"
   },
   "devDependencies": {
     "grunt": "~0.3.15",

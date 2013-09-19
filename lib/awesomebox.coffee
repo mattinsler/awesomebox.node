@@ -14,7 +14,12 @@ Api = {
   
   Me: class MeApi
     constructor: (@client) ->
+      @providers = new Api.MeProviders(@client)
     get: (cb) -> @client.get('/me', cb)
+  
+  MeProviders: class MeProvidersApi
+    constructor: (@client) ->
+    create: (data, cb) -> @client.post('/me/providers', data, cb)
   
   Boxes: class BoxesApi
     constructor: (@client) ->

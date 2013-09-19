@@ -1,5 +1,5 @@
 (function() {
-  var Api, Awesomebox, BoxApi, BoxesApi, DomainApi, DomainsApi, MeApi, ProviderApi, ProvidersApi, Rest, UsersApi, VersionApi, VersionsApi, encode, fs, stream,
+  var Api, Awesomebox, BoxApi, BoxesApi, DomainApi, DomainsApi, MeApi, MeProvidersApi, ProviderApi, ProvidersApi, Rest, UsersApi, VersionApi, VersionsApi, encode, fs, stream,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -48,6 +48,7 @@
 
       function MeApi(client) {
         this.client = client;
+        this.providers = new Api.MeProviders(this.client);
       }
 
       MeApi.prototype.get = function(cb) {
@@ -55,6 +56,19 @@
       };
 
       return MeApi;
+
+    })(),
+    MeProviders: MeProvidersApi = (function() {
+
+      function MeProvidersApi(client) {
+        this.client = client;
+      }
+
+      MeProvidersApi.prototype.create = function(data, cb) {
+        return this.client.post('/me/providers', data, cb);
+      };
+
+      return MeProvidersApi;
 
     })(),
     Boxes: BoxesApi = (function() {

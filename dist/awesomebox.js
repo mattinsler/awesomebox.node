@@ -294,7 +294,7 @@
     function Awesomebox(options) {
       this.options = options != null ? options : {};
       Awesomebox.__super__.constructor.call(this, {
-        base_url: this.options.base_url || 'http://api.awesomebox.es'
+        base_url: this.options.base_url || 'http://api.awesomebox.co'
       });
       this.hook('pre:request', Awesomebox.hooks.json);
       if (this.options.api_key != null) {

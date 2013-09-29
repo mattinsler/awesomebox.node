@@ -154,7 +154,7 @@ class Awesomebox extends Rest
           return
     
   constructor: (@options = {}) ->
-    super(base_url: @options.base_url or 'http://api.awesomebox.es')
+    super(base_url: @options.base_url or 'http://api.awesomebox.co')
     
     @hook('pre:request', Awesomebox.hooks.json)
     @hook('pre:request', Awesomebox.hooks.api_key(@options.api_key)) if @options.api_key?

@@ -246,6 +246,15 @@
           return request_opts.headers['x-awesomebox-key'] = api_key;
         };
       },
+      user_agent: function(agent) {
+        return function(request_opts, opts) {
+          var _ref;
+          if ((_ref = request_opts.headers) == null) {
+            request_opts.headers = {};
+          }
+          return request_opts.headers['user-agent'] = agent;
+        };
+      },
       email_password: function(email, password) {
         return function(request_opts, opts) {
           return request_opts.auth = {
@@ -302,6 +311,9 @@
       }
       if ((this.options.email != null) && (this.options.password != null)) {
         this.hook('pre:request', Awesomebox.hooks.email_password(this.options.email, this.options.password));
+      }
+      if (this.options.user_agent != null) {
+        this.hook('pre:request', Awesomebox.hooks.user_agent(this.options.user_agent));
       }
       this.hook('pre:get', Awesomebox.hooks.data_to_querystring);
       this.hook('pre:post', Awesomebox.hooks.pre_attach_files);

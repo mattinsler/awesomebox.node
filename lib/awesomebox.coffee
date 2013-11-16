@@ -124,6 +124,11 @@ class Awesomebox extends Rest
         request_opts.headers ?= {}
         request_opts.headers['x-awesomebox-key'] = api_key
     
+    user_agent: (agent) ->
+      (request_opts, opts) ->
+        request_opts.headers ?= {}
+        request_opts.headers['user-agent'] = agent
+    
     email_password: (email, password) ->
       (request_opts, opts) ->
         request_opts.auth =
@@ -159,6 +164,7 @@ class Awesomebox extends Rest
     @hook('pre:request', Awesomebox.hooks.json)
     @hook('pre:request', Awesomebox.hooks.api_key(@options.api_key)) if @options.api_key?
     @hook('pre:request', Awesomebox.hooks.email_password(@options.email, @options.password)) if @options.email? and @options.password?
+    @hook('pre:request', Awesomebox.hooks.user_agent(@options.user_agent)) if @options.user_agent?
     
     @hook('pre:get', Awesomebox.hooks.data_to_querystring)
     
